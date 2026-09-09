@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+*.log
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+frontend/node_modules/
+npm-debug.log*
+
+# Environment / Secrets
+.env
+.env.local
+.env.*.local
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# ML artifacts
+ml/**/outputs/
+ml/**/checkpoints/
+ml/**/logs/
+ml/**/weights/
+*.pt
+*.pth
+*.ckpt
+!models/*.md
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build / temp
+build/
+*.tsbuildinfo

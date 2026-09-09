@@ -1,0 +1,6 @@
+model,iou,dice,precision,recall,pr_auc,fpr,fnr,latency_ms
+Classical Baseline (Otsu),0.3733,0.5437,0.3735,0.9986,0.9655,0.0696,0.0014,2.8559
+U-Net Baseline,0.6729,0.8045,0.9939,0.6757,0.9681,0.0002,0.3243,155.3631
+U-Net++ (Nested),0.9079,0.9518,0.9786,0.9263,0.9934,0.0008,0.0737,196.0457
+SegFormer (Primary Transformer),0.7536,0.8595,0.7886,0.9445,0.9538,0.0105,0.0555,67.7683
+Two-Stage System (SegFormer + Lookalike Clf),0.0000,0.0000,0.0000,0.0000,0.3695,0.0000,1.0000,38.7841

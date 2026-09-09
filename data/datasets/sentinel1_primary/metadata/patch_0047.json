@@ -1,0 +1,22 @@
+{
+  "patch_id": "patch_0047",
+  "parent_scene_id": "S1A_IW_GRDH_1SDV_20260303_SCENE_05",
+  "region": "Gulf_of_Oman_Entrance",
+  "channels": [
+    "VV",
+    "VH",
+    "VV_minus_VH"
+  ],
+  "dimensions": [
+    256,
+    256
+  ],
+  "has_oil": false,
+  "has_lookalike": true,
+  "lookalike_type": "low_wind",
+  "has_ship": false,
+  "oil_pixel_count": 0,
+  "lookalike_pixel_count": 13517,
+  "resolution_meters": 10.0,
+  "sensor": "Sentinel-1 C-Band SAR (IW Mode)"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "scene_s1a_20260301_arabian_sea_001",
+  "source": "Copernicus Sentinel-1A",
+  "sensor": "C-SAR (Synthetic Aperture Radar)",
+  "mode": "IW (Interferometric Wide Swath)",
+  "polarization": "VV+VH",
+  "acquisition_time": "2026-03-01T06:45:00Z",
+  "latitude": 19.345,
+  "longitude": 71.418,
+  "bounding_box": [71.15, 19.15, 71.68, 19.55],
+  "resolution_meters": 10.0,
+  "cloud_cover_percent": 0.0,
+  "file_path": "data/samples/imagery/sentinel1_20260301_sar_sample.png",
+  "status": "INGESTED",
+  "metadata": {
+    "orbit_number": 52140,
+    "pass_direction": "DESCENDING",
+    "incidence_angle_min": 31.2,
+    "incidence_angle_max": 46.1,
+    "relative_orbit": 89,
+    "absolute_orbit": 52140,
+    "spatial_reference": "EPSG:4326",
+    "notes": "Optimal sea-state backscatter conditions for oil-spill detection. Surface wind speed approx 4.8 m/s."
+  }
+}

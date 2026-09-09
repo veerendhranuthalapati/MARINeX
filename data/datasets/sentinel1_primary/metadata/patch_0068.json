@@ -1,0 +1,22 @@
+{
+  "patch_id": "patch_0068",
+  "parent_scene_id": "S1A_IW_GRDH_1SDV_20260304_SCENE_07",
+  "region": "Arabian_Sea_Deep_Water",
+  "channels": [
+    "VV",
+    "VH",
+    "VV_minus_VH"
+  ],
+  "dimensions": [
+    256,
+    256
+  ],
+  "has_oil": false,
+  "has_lookalike": true,
+  "lookalike_type": "biogenic",
+  "has_ship": true,
+  "oil_pixel_count": 0,
+  "lookalike_pixel_count": 3210,
+  "resolution_meters": 10.0,
+  "sensor": "Sentinel-1 C-Band SAR (IW Mode)"
+}

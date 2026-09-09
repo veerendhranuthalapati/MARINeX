@@ -1,0 +1,103 @@
+{
+  "slick_id": "slick_s1a_20260301_001",
+  "evaluated_at": "2026-03-01T07:15:00Z",
+  "total_vessels_scanned": 5,
+  "scoring_weights": {
+    "proximity": 0.35,
+    "temporal_consistency": 0.25,
+    "trajectory_consistency": 0.25,
+    "behavior": 0.15
+  },
+  "candidates": [
+    {
+      "rank": 1,
+      "vessel_id": "vessel_636019842",
+      "mmsi": 636019842,
+      "imo": 9456789,
+      "vessel_name": "PACIFIC CROWN",
+      "vessel_type": "Crude Oil Tanker",
+      "flag": "Liberia",
+      "overall_score": 89.6,
+      "confidence": "HIGH",
+      "factors": {
+        "proximity_score": 96.2,
+        "temporal_score": 92.4,
+        "trajectory_score": 91.0,
+        "behavior_score": 75.0
+      },
+      "metrics": {
+        "closest_distance_km": 0.42,
+        "time_delta_minutes": 5.0,
+        "trajectory_intersects_origin": true,
+        "transit_speed_knots": 11.8,
+        "speed_anomaly_detected": false
+      },
+      "evidence": [
+        "Trajectory intersected the 95% probable origin uncertainty polygon at 03:25 UTC.",
+        "Closest point of approach (CPA) was 0.42 km from estimated spill origin centroid.",
+        "Vessel transit time coincides with inferred release window (delta: 5 minutes from 03:30 UTC).",
+        "Vessel category is high-risk cargo carrier (Crude Oil Tanker, DWT 105,000 MT)."
+      ],
+      "investigation_recommendation": "PRIORITY_1: Request voyage logbook, oil record book (Part II), and bilge discharge monitoring records via port state control."
+    },
+    {
+      "rank": 2,
+      "vessel_id": "vessel_212589000",
+      "mmsi": 212589000,
+      "imo": 9784321,
+      "vessel_name": "NORDIC VOYAGER",
+      "vessel_type": "Chemical Tanker",
+      "flag": "Cyprus",
+      "overall_score": 64.3,
+      "confidence": "MEDIUM",
+      "factors": {
+        "proximity_score": 62.0,
+        "temporal_score": 68.5,
+        "trajectory_score": 65.0,
+        "behavior_score": 65.0
+      },
+      "metrics": {
+        "closest_distance_km": 4.12,
+        "time_delta_minutes": 30.0,
+        "trajectory_intersects_origin": false,
+        "transit_speed_knots": 13.0,
+        "speed_anomaly_detected": false
+      },
+      "evidence": [
+        "Vessel was within secondary proximity buffer (4.12 km from origin centroid).",
+        "Timestamp was 30 minutes after primary release window.",
+        "Trajectory parallel to drift axis, potential secondary candidate if wind drift factor was lower."
+      ],
+      "investigation_recommendation": "PRIORITY_2: Monitor secondary AIS logs and verify if speed alterations occurred."
+    },
+    {
+      "rank": 3,
+      "vessel_id": "vessel_419001234",
+      "mmsi": 419001234,
+      "imo": 9321546,
+      "vessel_name": "BHARAT RATNA",
+      "vessel_type": "Container Ship",
+      "flag": "India",
+      "overall_score": 28.5,
+      "confidence": "LOW",
+      "factors": {
+        "proximity_score": 25.0,
+        "temporal_score": 40.0,
+        "trajectory_score": 20.0,
+        "behavior_score": 30.0
+      },
+      "metrics": {
+        "closest_distance_km": 11.85,
+        "time_delta_minutes": 30.0,
+        "trajectory_intersects_origin": false,
+        "transit_speed_knots": 16.4,
+        "speed_anomaly_detected": false
+      },
+      "evidence": [
+        "Vessel transited over 11 km east of probable origin polygon.",
+        "Steady high transit speed (16.4 knots), standard container corridor transit."
+      ],
+      "investigation_recommendation": "EXCLUDED: Spatial proximity and trajectory inconsistent with oil spill origin."
+    }
+  ]
+}

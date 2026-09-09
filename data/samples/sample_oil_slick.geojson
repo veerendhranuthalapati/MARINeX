@@ -1,0 +1,52 @@
+{
+  "type": "FeatureCollection",
+  "name": "OilSlickDetections",
+  "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "slick_s1a_20260301_001",
+      "properties": {
+        "slick_id": "slick_s1a_20260301_001",
+        "scene_id": "scene_s1a_20260301_arabian_sea_001",
+        "detection_method": "CLASSICAL_BASELINE_ADAPTIVE_THRESHOLD",
+        "detected_at": "2026-03-01T06:45:00Z",
+        "confidence": 0.915,
+        "area_km2": 14.82,
+        "perimeter_km": 28.45,
+        "centroid": [71.4182, 19.3451],
+        "length_km": 8.74,
+        "width_km": 1.92,
+        "orientation_deg": 65.4,
+        "compactness": 0.23,
+        "backscatter_contrast_db": -5.2,
+        "look_alike_risk": "LOW",
+        "attributes": {
+          "sensor_polarization": "VV",
+          "sea_surface_temp_c": 27.8,
+          "estimated_thickness_um": 50.0,
+          "estimated_volume_m3": 741.0,
+          "is_continuous": true
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [71.385, 19.320],
+            [71.402, 19.332],
+            [71.425, 19.348],
+            [71.450, 19.362],
+            [71.462, 19.370],
+            [71.458, 19.375],
+            [71.438, 19.368],
+            [71.415, 19.352],
+            [71.392, 19.336],
+            [71.380, 19.326],
+            [71.385, 19.320]
+          ]
+        ]
+      }
+    }
+  ]
+}

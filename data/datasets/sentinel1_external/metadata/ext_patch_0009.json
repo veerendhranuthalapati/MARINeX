@@ -1,0 +1,22 @@
+{
+  "patch_id": "ext_patch_0009",
+  "parent_scene_id": "S1B_IW_GRDH_1SDV_20260310_EXT_01",
+  "region": "Singapore_Strait_East",
+  "channels": [
+    "VV",
+    "VH",
+    "VV_minus_VH"
+  ],
+  "dimensions": [
+    256,
+    256
+  ],
+  "has_oil": false,
+  "has_lookalike": false,
+  "lookalike_type": "none",
+  "has_ship": false,
+  "oil_pixel_count": 0,
+  "lookalike_pixel_count": 0,
+  "resolution_meters": 10.0,
+  "sensor": "Sentinel-1 C-Band SAR (IW Mode)"
+}

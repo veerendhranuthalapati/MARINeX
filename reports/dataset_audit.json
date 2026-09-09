@@ -1,0 +1,88 @@
+{
+  "inventory": {
+    "dataset_root": "C:\\Users\\veere\\Desktop\\MARINeX\\data\\datasets\\sentinel1_primary",
+    "total_images_found": 120,
+    "total_masks_found": 120,
+    "paired_samples_count": 120,
+    "corrupted_files_count": 0,
+    "duplicate_groups_count": 0
+  },
+  "validation_summary": {
+    "total_samples": 120,
+    "zero_mask_count": 24,
+    "zero_mask_percentage": 20.0,
+    "oil_samples_count": 60,
+    "lookalike_samples_count": 60,
+    "clean_sea_count": 24,
+    "co_occurring_count": 24,
+    "mean_oil_foreground_ratio": 0.07471694946289062,
+    "max_oil_foreground_ratio": 0.166351318359375,
+    "mean_lookalike_foreground_ratio": 0.16725184122721354
+  },
+  "leakage_verification": {
+    "leakage_detected": false,
+    "is_leakage_free": true,
+    "sample_id_overlaps": {
+      "train_val": [],
+      "train_test": [],
+      "val_test": []
+    },
+    "parent_scene_overlaps": {
+      "train_val": [],
+      "train_test": [],
+      "val_test": []
+    },
+    "hash_collision_overlaps": {
+      "train_val": 0,
+      "train_test": 0,
+      "val_test": 0
+    },
+    "verification_status": "PASSED: Zero leakage between parent scenes and splits"
+  },
+  "split_manifest": {
+    "strategy": "group_aware_parent_scene",
+    "sample_counts": {
+      "train": 80,
+      "val": 20,
+      "test": 20,
+      "total": 120
+    },
+    "class_balance": {
+      "train": {
+        "oil": 40,
+        "lookalike": 40,
+        "clean": 16
+      },
+      "val": {
+        "oil": 10,
+        "lookalike": 10,
+        "clean": 4
+      },
+      "test": {
+        "oil": 10,
+        "lookalike": 10,
+        "clean": 4
+      }
+    },
+    "parent_scenes": {
+      "train": [
+        "S1A_IW_GRDH_1SDV_20260304_SCENE_08",
+        "S1A_IW_GRDH_1SDV_20260303_SCENE_06",
+        "S1A_IW_GRDH_1SDV_20260302_SCENE_03",
+        "S1A_IW_GRDH_1SDV_20260305_SCENE_09",
+        "S1A_IW_GRDH_1SDV_20260305_SCENE_10",
+        "S1A_IW_GRDH_1SDV_20260304_SCENE_07",
+        "S1A_IW_GRDH_1SDV_20260306_SCENE_12",
+        "S1A_IW_GRDH_1SDV_20260302_SCENE_04"
+      ],
+      "val": [
+        "S1A_IW_GRDH_1SDV_20260303_SCENE_05",
+        "S1A_IW_GRDH_1SDV_20260301_SCENE_01"
+      ],
+      "test": [
+        "S1A_IW_GRDH_1SDV_20260301_SCENE_02",
+        "S1A_IW_GRDH_1SDV_20260306_SCENE_11"
+      ]
+    }
+  }
+}

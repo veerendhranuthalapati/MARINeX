@@ -1,0 +1,13 @@
+ablation,variant,iou,dice,precision,recall,fpr
+Input Channels,VV,0.7602,0.8638,0.7616,0.9976,0.0130
+Input Channels,VV_VH,0.9396,0.9689,0.9656,0.9721,0.0014
+Input Channels,VV_VH_DIFF,0.8899,0.9417,0.9933,0.8953,0.0002
+Augmentation,No Augmentation,0.8552,0.9219,0.8619,0.9910,0.0066
+Augmentation,Physical SAR Augmentation,0.9145,0.9553,0.9173,0.9966,0.0037
+Loss Formulation,BCE,0.8285,0.9062,0.8348,0.9909,0.0081
+Loss Formulation,DICE,0.7755,0.8735,0.7780,0.9958,0.0118
+Loss Formulation,BCE_DICE,0.7728,0.8719,0.7730,0.9997,0.0122
+Loss Formulation,FOCAL,0.8662,0.9283,0.8891,0.9711,0.0050
+Loss Formulation,TVERSKY,0.7628,0.8654,0.7971,0.9465,0.0100
+Architecture Stages,Single-Stage (SegFormer),0.7536,0.8595,0.7886,0.9445,0.0105
+Architecture Stages,Two-Stage (SegFormer + Lookalike Classifier),0.0000,0.0000,0.0000,0.0000,0.0000

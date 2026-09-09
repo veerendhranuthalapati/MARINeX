@@ -1,0 +1,22 @@
+{
+  "patch_id": "patch_0083",
+  "parent_scene_id": "S1A_IW_GRDH_1SDV_20260305_SCENE_09",
+  "region": "Mumbai_Offshore_Platforms",
+  "channels": [
+    "VV",
+    "VH",
+    "VV_minus_VH"
+  ],
+  "dimensions": [
+    256,
+    256
+  ],
+  "has_oil": true,
+  "has_lookalike": false,
+  "lookalike_type": "none",
+  "has_ship": false,
+  "oil_pixel_count": 5907,
+  "lookalike_pixel_count": 0,
+  "resolution_meters": 10.0,
+  "sensor": "Sentinel-1 C-Band SAR (IW Mode)"
+}
