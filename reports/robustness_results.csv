@@ -2,7 +2,7 @@ condition,iou,dice,precision,recall,fpr
 Clean Baseline,0.8857,0.9394,0.9080,0.9731,0.0041
 Reduced Contrast (0.6x),0.8654,0.9278,0.8865,0.9733,0.0052
 Severe Contrast (0.4x),0.8795,0.9359,0.9009,0.9737,0.0044
-Enhanced Speckle (L=2.0),0.4424,0.6134,0.4436,0.9939,0.0518
+Enhanced Speckle (L=2.0),0.4432,0.6142,0.4444,0.9938,0.0516
 Resolution Degradation (20m),0.5786,0.7331,0.5787,0.9998,0.0302
 Radiometric Shift (-3dB),0.8940,0.9440,0.9146,0.9753,0.0038
 Radiometric Shift (+3dB),0.3030,0.4651,0.9998,0.3030,0.0000

@@ -116,7 +116,7 @@ The platform is organized around **incidents**, not isolated slicks:
 
 - **Model**: PyTorch U-Net FINAL (IoU=0.8857 / Dice=0.9394 on frozen test),
   probability maps calibrated via log-space temperature scaling
-  (ECE 17.35 % → 0.46 %, T=0.226). Production threshold 0.40.
+  (ECE 17.35 % → 0.46 %, T=0.226). Production threshold 0.70.
 - **Adapters** apply the identical preprocessing contract
   (`SARPreprocessor(strategy="percentile")`, channel axis `[VV, VH, DIFF]`);
   single-band inputs are replicated and flagged via `channel_note`.

@@ -105,11 +105,11 @@
     },
     {
       "condition": "Enhanced Speckle (L=2.0)",
-      "iou": 0.4424,
-      "dice": 0.6134,
-      "precision": 0.4436,
-      "recall": 0.9939,
-      "fpr": 0.0518
+      "iou": 0.4432,
+      "dice": 0.6142,
+      "precision": 0.4444,
+      "recall": 0.9938,
+      "fpr": 0.0516
     },
     {
       "condition": "Resolution Degradation (20m)",

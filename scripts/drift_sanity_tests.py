@@ -58,7 +58,9 @@ def physics_sanity(svc):
     results = {}
     tests = [
         ("eastward_current", 0.5, 0.0, "origin_west_of_centroid"),
+        ("westward_current", -0.5, 0.0, "origin_east_of_centroid"),
         ("northward_current", 0.0, 0.5, "origin_south_of_centroid"),
+        ("southward_current", 0.0, -0.5, "origin_north_of_centroid"),
         ("zero_forcing", 0.0, 0.0, "origin_near_centroid"),
     ]
     for name, cu, cv, check in tests:
@@ -70,9 +72,15 @@ def physics_sanity(svc):
         if check == "origin_west_of_centroid":
             passed = ox < cx
             detail = f"origin_lon={ox:.5f} < centroid_lon={cx:.5f}"
+        elif check == "origin_east_of_centroid":
+            passed = ox > cx
+            detail = f"origin_lon={ox:.5f} > centroid_lon={cx:.5f}"
         elif check == "origin_south_of_centroid":
             passed = oy < cy
             detail = f"origin_lat={oy:.5f} < centroid_lat={cy:.5f}"
+        elif check == "origin_north_of_centroid":
+            passed = oy > cy
+            detail = f"origin_lat={oy:.5f} > centroid_lat={cy:.5f}"
         else:
             passed = dist < 5.0
             detail = f"drift_distance={dist:.3f} km < 5 km"

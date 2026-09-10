@@ -1,6 +1,6 @@
 # MARINeX Quality Gate Checklist (SIH26143)
 
-A 31-item release gate for the MARINeX repository before the final commit and
+A 42-item release gate for the MARINeX repository before the final commit and
 push to `origin`. Every item is verified by running its command or by inspecting
 the referenced artifact; nothing is asserted without evidence.
 
@@ -65,6 +65,47 @@ Legend: `[x]` complete, `[ ]` pending.
       DEMO_DATA. **Secrets scan run** (see below) - no real credentials found.
 - [x] 31. Final commit created and pushed to `origin` (`8f5a18d` on `main`,
       pushed as `59e46df..8f5a18d`; local and remote are in sync).
+
+## Final Validation Phase Items
+
+- [x] 32. `docs/FINAL_EXPERIMENT_PROTOCOL.md` written: frozen protocol, single
+      protected test pass, validation-only selection rule, synthetic-data
+      honesty clause.
+- [x] 33. Final leakage audit re-run PASS: `reports/final_leakage_audit.{json,md}`
+      (sample-id 0, scene-containment 0, sha256 0, near-dup 0, corrupted 0).
+- [x] 34. Final dataset statistics produced: `reports/final_dataset_statistics.csv`
+      (120 samples, 60 oil / 60 lookalike / 24 empty masks; all 3-ch 256×256).
+- [x] 35. Drift physics sanity extended to **all four cardinal currents + zero**
+      (east/west/north/south, `scripts/drift_sanity_tests.py`), ALL PASS; 15
+      sensitivity scenarios; determinism PASS.
+- [x] 36. AIS partitioned engine re-verified: `scripts/prepare_ais.py` re-created
+      the y/m/d parquet partition; `reports/ais_benchmark.json` 5 queries all
+      single-digit ms; quality audit clean (0 missing/range/dup/jumps).
+- [x] 37. Multi-scale inference robustness measured:
+      `reports/multi_scale_evaluation.csv` (native 256 optimal; 224/288/320/384
+      degrade IoU 0.66-0.68 with higher FPR) — resolution sensitivity honestly
+      documented, not hidden.
+- [x] 38. Model card written: `docs/models/MARINeX_Oil_Spill_Model_Card.md`
+      (`marinex-unet-v1.0.0`, threshold 0.70, T 0.2262, ECE/Brier post-cal, all
+      frozen-test metrics, generalization/lookalike/explainability/limitations,
+      versioning/provenance).
+- [x] 39. Final docs written + stale values reconciled: `FINAL_ARCHITECTURE.md`,
+      `FINAL_DATA_REPORT.md`, `DRIFT_VALIDATION.md`, `AIS_VALIDATION.md`,
+      `SECURITY_AUDIT.md`; `reports/final_model_benchmark.md` (Phase 20) is the
+      single canonical benchmark table; `docs/ML.md` and `docs/architecture.md`
+      corrected to campaign-authoritative numbers (th=0.70; unet++ test IoU
+      0.9175 at val-best th=0.55).
+- [x] 40. Security audit PASS (`docs/SECURITY_AUDIT.md`): no secrets tracked
+      (only `.env.example` placeholders), 0 secret patterns in tracked source;
+      single moderate react-router advisory is SSR-only and NOT applicable to
+      the client-side SPA; fix path documented, breaking major upgrade deferred.
+- [x] 41. End-to-end pipeline CLI re-verified on a fresh-schema DB:
+      `scripts/seed_demo_data.py` + `scripts/run_pipeline_cli.py` → SUCCESS
+      (Scene→Detection→Characterization→Drift→AIS→Attribution→Report; suspect
+      PACIFIC CROWN, evidence 40.6/100). Stale root `marinex.db` (pre-incident
+      schema) rebuilt instead of patched.
+- [ ] 42. Final commit created and pushed to `origin` (Phase 48-49, no
+      `--force`).
 
 ## Secrets Scan (verification note)
 

@@ -248,7 +248,7 @@ synthetic SAR-like patches; reports never claim real-data generalization.
 ```bash
 # Training & evaluation (writes models/best_model/, reports/)
 .venv\Scripts\python ml/train.py --config configs/training/unet_plus_plus.yaml
-.venv\Scripts\python ml/evaluate.py --checkpoint models/checkpoints/unetpp_best.pt --model unet_plus_plus --threshold 0.40
+.venv\Scripts\python ml/evaluate.py --checkpoint models/best_model/marinex_unet_plus_plus_v1.pt --model unet_plus_plus --threshold 0.55
 
 # Explainability panel (SegFormer, all 3 methods)
 .venv\Scripts\python ml/explain.py --checkpoint models/checkpoints/segformer_primary_best.pt --model segformer \
