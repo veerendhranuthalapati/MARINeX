@@ -104,8 +104,8 @@ Legend: `[x]` complete, `[ ]` pending.
       (Scene→Detection→Characterization→Drift→AIS→Attribution→Report; suspect
       PACIFIC CROWN, evidence 40.6/100). Stale root `marinex.db` (pre-incident
       schema) rebuilt instead of patched.
-- [ ] 42. Final commit created and pushed to `origin` (Phase 48-49, no
-      `--force`).
+- [x] 42. Final commit created and pushed to `origin` (`9698eb6` on `main`,
+      pushed as `6294b78..9698eb6`; local and remote are in sync, no `--force`).
 
 ## Secrets Scan (verification note)
 
