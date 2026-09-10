@@ -63,8 +63,8 @@ Legend: `[x]` complete, `[ ]` pending.
       EVIDENCE, DEMO, ML_EXPLAINABILITY_VALIDATION, QUALITY_GATE, README (encoding
       fixed), CURRENT_STATE (rewritten). No fabricated metrics; demo data labeled
       DEMO_DATA. **Secrets scan run** (see below) - no real credentials found.
-- [ ] 31. Final commit created and pushed to `origin` (contains the last commit
-      `f764d88`; this item is still pending on the current working tree).
+- [x] 31. Final commit created and pushed to `origin` (`8f5a18d` on `main`,
+      pushed as `59e46df..8f5a18d`; local and remote are in sync).
 
 ## Secrets Scan (verification note)
 
