@@ -1,0 +1,97 @@
+# MARINeX ML Training & Evaluation
+
+All commands below use `.venv`. Training/eval are fully config-driven and
+environment-independent (paths resolved from `DATA_ROOT`, `ARTIFACT_ROOT`,
+`SPLIT_PATH`, `MLFLOW_URI`).
+
+## Models
+
+| Registry key | Architecture | Type |
+|---|---|---|
+| `classical` | Adaptive Otsu + dark-spot segmentation | baseline |
+| `unet` | U-Net (ResNet-50-style encoder) | deep |
+| `unet_plus_plus` | Nested U-Net++ | deep |
+| `segformer` | Hierarchical MiT transformer + All-MLP decoder | deep |
+| `classifier` | OilLookalikeClassifier (stage-B, two-stage systems) | shallow |
+
+Build via `ml.models.registry.build_model(name, in_channels=3, num_classes=1)`.
+
+## Training
+
+```bash
+.venv\Scripts\python ml/train.py --config configs/training/unet_plus_plus.yaml
+.venv\Scripts\python ml/train.py --config configs/training/segformer.yaml
+```
+
+- Configs: `configs/training/*.yaml`, environments: `configs/environments/local.yaml`
+- Artifact → `models/best_model/marinex_<model>_v1.pt`
+- Report → `reports/train_result_<model>_seed<seed>.json`
+- Threshold calibrated on validation set; MLflow logging active when `MLFLOW_URI` is set.
+
+## Evaluation
+
+```bash
+.venv\Scripts\python ml/evaluate.py \
+  --checkpoint models/checkpoints/unetpp_best.pt \
+  --model unet_plus_plus --threshold 0.40
+```
+
+Exports `reports/final_ml_benchmark.csv` with columns:
+`model,dataset,input,IoU,Dice,precision,recall,PR-AUC,FPR,FNR,ECE,threshold,latency_ms`
+using the leakage-free group-aware test split.
+
+## Measured results (REAL, synthetic-only dataset)
+
+### Primary test split
+
+| Model | IoU | Dice | Precision | Recall | FPR | FNR |
+|---|---|---|---|---|---|---|
+| Classical (Otsu) | 0.3733 | 0.5437 | 0.3735 | 0.9986 | 0.0696 | 0.0014 |
+| U-Net | 0.6729 | 0.8045 | 0.9939 | 0.6757 | 0.0002 | 0.3243 |
+| U-Net++ | 0.9079 | 0.9518 | 0.9786 | 0.9263 | 0.0008 | 0.0737 |
+| SegFormer | 0.7536 | 0.8595 | 0.7886 | 0.9445 | 0.0105 | 0.0555 |
+| Two-Stage (historical, BROKEN) | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.0000 |
+
+Fresh `ml/evaluate.py` run on `unetpp_best.pt` (threshold 0.40): IoU **0.9215**,
+Dice **0.9592**, Precision 0.9351, Recall 0.9845, PR-AUC 0.9937, FPR 0.0028,
+FNR 0.0155, ECE 0.1297.
+
+### Two-stage pipeline (REPAIRED this session)
+
+`scripts/smoke_two_stage.py` (SegFormer stage-A + crop classifier stage-B):
+test IoU **0.8379**, Dice **0.9118**, Precision 0.9303, Recall 0.8940.
+
+> The historical Two-Stage `0.0000` was a real bug, now fixed: (1) inference used
+> `/255.0` while SegFormer was trained with percentile preprocessing; (2) stage-B
+> classifier was trained on whole 256×256 patches but evaluated on 64×64 crops.
+> Both fixed via `SARPreprocessor` invariant in `ml/training/two_stage_pipeline.py`.
+
+### Robustness / transfer (SegFormer)
+
+| Domain | IoU | Dice | Precision | Recall |
+|---|---|---|---|---|
+| In-domain (Arabian Sea) | 0.7536 | 0.8595 | 0.7886 | 0.9445 |
+| Cross-dataset (Singapore/Malacca) | 0.7344 | 0.8468 | 0.9186 | 0.7855 |
+
+### Selected ablations (best variants)
+
+- Input channels: `VV_VH` → 0.9396 IoU; `VV_VH_DIFF` → 0.8899; `VV` alone → 0.7602
+- Augmentation: physical SAR augmentation → 0.9145 (vs 0.8552 none)
+- Loss: `FOCAL` → 0.8662 (best of BCE/DICE/BCE_DICE/TVERSKY)
+
+Full tables: `reports/model_comparison.csv`, `reports/ablation_results.csv`,
+`reports/cross_dataset_results.csv`, `reports/robustness_results.csv`.
+
+## Input channels
+
+The `input` column uses channel groups `VV`, `VV_VH`, `VV_VH_DIFF`. VV_VH is the
+strongest configuration measured to date.
+
+## Tests
+
+```bash
+.venv\Scripts\python -m pytest ml/tests -q
+```
+
+19 tests covering manifest catalog, AIS schema/trajectories, DuckDB engine queries,
+metrics correctness, model registry, and single-image inference.

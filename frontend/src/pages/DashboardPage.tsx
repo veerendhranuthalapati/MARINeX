@@ -41,11 +41,22 @@ export const DashboardPage: React.FC = () => {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const invs = await MarineXApi.getInvestigations().catch(() => []);
-      const primarySlickId = invs[0]?.slick_id;
+      // Incident-centric: seed the SIH26143 demo scenario on first load, then
+      // source all domain objects (scene -> slicks -> env -> attribution) from
+      // the incident. Backend remains the source of truth.
+      let incidents = await MarineXApi.getIncidents().catch(() => [] as any[]);
+      if (!incidents.length) {
+        await MarineXApi.runDemoPipeline();
+        incidents = await MarineXApi.getIncidents().catch(() => [] as any[]);
+      }
+      const incidentId = incidents[0]?.id;
+
+      const inc = incidentId ? await MarineXApi.getIncident(incidentId).catch(() => null) : null;
+      const incidentSlicks: OilSlick[] = inc?.slicks ?? [];
+      const primarySlickId = incidentSlicks[0]?.id ?? incidents[0]?.slick_id;
 
       const [slicksRes, aisRes, envRes, cands] = await Promise.all([
-        MarineXApi.getSlicks().catch(() => []),
+        Promise.resolve(incidentSlicks.length ? incidentSlicks : MarineXApi.getSlicks().catch(() => [])),
         MarineXApi.getAISPoints().catch(() => []),
         primarySlickId
           ? MarineXApi.getEnvironmentalSnapshot(primarySlickId).catch(() => null)

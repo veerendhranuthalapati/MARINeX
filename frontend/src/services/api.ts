@@ -10,6 +10,8 @@ import type {
   Investigation,
   InvestigationReport,
   DetectionRunResult,
+  Incident,
+  EvidenceRecord,
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -327,6 +329,56 @@ export const MarineXApi = {
   // Demo Pipeline
   runDemoPipeline: async () => {
     const res = await api.post('/demo/run-e2e');
+    return res.data;
+  },
+
+  // Incidents (central domain object - Phase 2)
+  getIncidents: async (): Promise<Incident[]> => {
+    const res = await api.get('/incidents');
+    return res.data.incidents ?? res.data;
+  },
+
+  getIncident: async (incidentId: string): Promise<Incident> => {
+    const res = await api.get(`/incidents/${incidentId}`);
+    return res.data;
+  },
+
+  createIncident: async (data: {
+    id?: string;
+    title: string;
+    description?: string;
+    scenario?: string;
+    centroid?: number[];
+    bounding_box?: number[];
+    status_label?: string;
+  }): Promise<Incident> => {
+    const res = await api.post(`/incidents`, data);
+    return res.data;
+  },
+
+  runIncidentDetection: async (
+    incidentId: string,
+    sceneId: string,
+    method: string = 'PRODUCTION_ML'
+  ): Promise<{ status: string; slicks: OilSlick[] }> => {
+    const res = await api.post(`/incidents/${incidentId}/detect`, null, {
+      params: { scene_id: sceneId, method },
+    });
+    return res.data;
+  },
+
+  getIncidentEvidence: async (incidentId: string): Promise<EvidenceRecord[]> => {
+    const res = await api.get(`/incidents/${incidentId}/evidence`);
+    return res.data.evidence_records ?? res.data;
+  },
+
+  getIncidentOrigin: async (incidentId: string): Promise<any> => {
+    const res = await api.get(`/incidents/${incidentId}/origin`);
+    return res.data;
+  },
+
+  getIncidentReport: async (incidentId: string): Promise<any> => {
+    const res = await api.get(`/incidents/${incidentId}/report`);
     return res.data;
   },
 };

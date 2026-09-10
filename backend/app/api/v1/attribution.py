@@ -9,6 +9,7 @@ from app.repositories.vessel_repo import VesselRepository
 from app.services.attribution.engine import VesselAttributionEngine
 from app.services.drift.service import MockDriftService
 from app.services.environmental.service import EnvironmentalService
+from app.services.evidence import EvidenceService
 from app.api.v1.ais import get_ais_provider
 from app.schemas.attribution import (
     AttributionRunRequest,
@@ -115,6 +116,18 @@ def run_vessel_attribution(
         status="UNDER_INVESTIGATION",
         priority_level="HIGH" if (results.candidates and results.candidates[0].overall_score >= 70) else "MEDIUM",
     )
+
+    # Phase 21: record AIS correlation + attribution evidence on the incident ledger.
+    incident_id = getattr(slick, "incident_id", None)
+    if incident_id:
+        EvidenceService.record_ais(
+            db, incident_id=incident_id, slick_id=slick_id,
+            vessel_count=len(trajectories),
+            query_window={"search_bbox": search_bbox,
+                          "t_start": t_start.isoformat(), "t_end": t_end.isoformat()},
+        )
+        EvidenceService.record_attribution(
+            db, incident_id=incident_id, slick_id=slick_id, results=results)
 
     return results
 

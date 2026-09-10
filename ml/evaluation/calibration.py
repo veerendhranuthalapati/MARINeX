@@ -1,11 +1,61 @@
 """
 Threshold Calibration and Probability Uncertainty Calibration Module.
-Sweeps validation probabilities to determine optimal operating thresholds and computes ECE.
+Sweeps validation probabilities to determine optimal operating thresholds, computes ECE,
+Brier score, and fits temperature scaling on validation data for confidence recalibration.
 """
 
 import numpy as np
 from typing import Dict, List, Any, Tuple
 from ml.evaluation.metrics import compute_pixel_metrics
+
+def compute_brier_score(
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+) -> float:
+    """Brier score := mean((y - p)^2) over all pixels. Lower is better."""
+    y_true_flat = y_true.flatten().astype(np.float64)
+    y_prob_flat = y_prob.flatten().astype(np.float64)
+    return float(np.mean((y_true_flat - y_prob_flat) ** 2))
+
+def fit_temperature_scaling(
+    y_true: np.ndarray,
+    y_prob: np.ndarray,
+    lr: float = 1e-2,
+    max_iter: int = 1000,
+) -> float:
+    """
+    Fits a single temperature scalar T > 0 that minimises the NLL of the
+    Bernoulli model p = sigmoid(z / T) on the VALIDATION set.
+    Temperature is optimised in log-space so it is guaranteed strictly positive
+    (negative temperatures are physically meaningless and would report a
+    degenerate 0 ECE). Returns the fitted temperature.
+    Never fit on test data.
+    """
+    import torch
+    z = np.log(np.clip(y_prob, 1e-7, 1 - 1e-7) / (1 - np.clip(y_prob, 1e-7, 1 - 1e-7)))
+    z_t = torch.tensor(z.flatten().astype(np.float64), requires_grad=False)
+    y_t = torch.tensor(y_true.flatten().astype(np.float32))
+    log_temp = torch.tensor(0.0, requires_grad=True)  # temp = exp(log_temp) > 0
+    opt = torch.optim.LBFGS([log_temp], lr=lr, max_iter=max_iter)
+    def closure():
+        opt.zero_grad()
+        temp = torch.exp(log_temp)
+        logits = z_t / temp
+        loss = torch.nn.functional.binary_cross_entropy_with_logits(logits, y_t)
+        loss.backward()
+        return loss
+    opt.step(closure)
+    return float(torch.exp(log_temp).item())
+
+def recalibrate_probabilities(
+    y_prob: np.ndarray,
+    temperature: float,
+) -> np.ndarray:
+    """Apply temperature scaling: p' = sigmoid( logit(p) / T ). T is floored at 0.01."""
+    t = max(float(temperature), 0.01)
+    logit = np.log(np.clip(y_prob, 1e-7, 1 - 1e-7) / (1 - np.clip(y_prob, 1e-7, 1 - 1e-7)))
+    p = 1.0 / (1.0 + np.exp(-logit / t))
+    return p.astype(np.float32)
 
 def calibrate_threshold(
     y_true: np.ndarray,

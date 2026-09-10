@@ -1,44 +1,45 @@
 # MARINeX Current State
 
+_SIH 2026 — PS ID SIH26143 — Team DOOM CODERS (Team ID 120462)._
+
 ## Build Status
 | Component | Status |
 |-----------|--------|
-| Backend Python (FastAPI) | ✅ 16/16 tests passing |
-| Frontend TypeScript (React/Vite) | ✅ Builds cleanly (0 TS errors) |
-| ML Training Pipeline | ✅ 7 model checkpoints present |
+| Backend Python (FastAPI) | ✅ 19/19 tests passing |
+| Frontend TypeScript (React/Vite) | ✅ Typechecks clean (tsc --noEmit, 0 errors) |
+| ML Training Campaign (Phases 1–11) | 🚧 Running (phase [9] multi-seed stability) |
 | Dataset (120 patches) | ✅ Group-aware split, zero leakage |
+| Frozen test (base UNet = FINAL) | IoU=0.8857 Dice=0.9394 Prec=0.9080 Rec=0.9731 ECE=0.1754 |
 
 ## Architecture
 - **Backend**: FastAPI + SQLAlchemy + SQLite (local) / PostgreSQL+PostGIS (Docker)
 - **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS + Leaflet + MapLibre
-- **ML**: PyTorch (U-Net, U-Net++, SegFormer) + scikit-learn (classical baselines)
+- **ML**: PyTorch (U-Net FINAL, U-Net++, SegFormer) + deterministic drift/attribution services
 - **Deployment**: Docker Compose (PostGIS 16 + backend + frontend)
 
-## API Endpoints (12 routers registered)
-`/api/v1/scenes`, `/api/v1/detection`, `/api/v1/slicks`, `/api/v1/drift`, `/api/v1/environment`, `/api/v1/attribution`, `/api/v1/reports`, `/api/v1/ais`, `/api/v1/investigations`, `/api/v1/candidates`, `/api/v1/health`, `/api/v1/demo`
+## API Surface (86 routes, mounted on both `/api/v1` and `/api`)
+- **Incidents** (incident-centric investigation): `POST/GET/PATCH /incidents[/{id}]`, `POST /incidents/{id}/scenes`, `POST /incidents/{id}/detect`, `GET/POST /incidents/{id}/evidence`, `GET /incidents/{id}/detection-runs`, `GET /incidents/{id}/drift-reports`, `GET /incidents/{id}/attribution`, `GET /incidents/{id}/origin`, `GET /incidents/{id}/report`
+- **Async jobs**: `POST /jobs`, `GET /jobs[/{job_id}]`, `POST /jobs/{job_id}/run` (detection/drift/attribution/environment/report stages run in background thread)
+- **Explainability**: `POST /explainability/run` (occlusion + Grad-CAM heatmaps, provenance JSON)
+- **Classic pipelines** (slick-scoped): `/scenes`, `/detection`, `/slicks`, `/drift`, `/environment`, `/attribution`, `/reports`, `/ais`, `/investigations`, `/candidates`, `/health`, `/demo`
+  - `POST /demo/seed` now incident-centric: creates `incident_sih26143_mumbai_offshore_001`, binds scene + slicks, sets UNDER_INVESTIGATION.
 
-## Frontend Pages (9 routes)
-Dashboard, Scenes, Detection, Drift, Investigation, Candidates, Reports, AIS Analysis, 404
+## Frontend Pages (9)
+Dashboard, Scenes, Detection, Drift, Investigation, Candidates, Reports, AIS Analysis, Settings (+404).
+Dashboard is incident-centric: seeds demo data if empty, then renders incident slicks, environment + candidate focus on the primary slick.
 
-## Type System
-Frontend `types/index.ts` has been aligned with backend Pydantic schemas, with backward-compatible legacy fields for map components that use older naming conventions (e.g., `centroid_lat`/`centroid_lon` alongside `centroid[]`, `area_sqkm` alongside `area_km2`).
+## ML Campaign State (phase [9] of 11)
+- [1] Split + leakage: clean. [2] Architecture → `unet`. [3] Ablations (channels/loss/aug). [4] Preprocessing → percentile. [5] Hard-negative mining + retrain. [6] Two-stage. [7] Calibration valid: **ECE raw 17.35% → calibrated 0.46% (T=0.226), Brier 0.0330 → 0.0025**. [8] Frozen test locked decisions.
+- [9] Multi-seed stability (seeds 42/123/999) — in progress on CPU; a silent OOM kill wiped mid-run twice under disk-full conditions; resolved by freeing disk, capping torch intra-op threads, and freeing retained training-state models before [9].
+- [10] Robustness + cross-dataset (sentinel1_external, 40 samples). [11] Exports.
 
 ## Known Limitations
-- SQLite mode (no PostGIS spatial queries) — works for demo
-- Map components use legacy field names with fallbacks to backend-aligned fields
-- Demo data seeded via `scripts/seed_demo_data.py` for Mumbai Offshore scenario
-- Chunk size warning on build (1.9MB JS bundle) — code splitting recommended for production
+- SQLite demo mode (no PostGIS); Postgres via Docker for spatial mode.
+- CPU-only training/inference (torch 2.14.0+cpu); campaign phases [2]–[9] cost ~45–55 s/epoch for UNet.
+- AIS ranking is an interpretable weighted evidence score (no local archive of full MarineCadastre history).
+- Chunk size warning on build (1.9 MB JS bundle) — code splitting recommended for production.
 
-## Files Modified This Session
-- `frontend/src/types/index.ts` — Complete rewrite to match backend schemas
-- `frontend/src/components/investigation/CategoryBadge.tsx` — Re-export from ui/
-- `frontend/src/components/investigation/RadialScore.tsx` — Re-export from ui/
-- `frontend/src/pages/ScenesPage.tsx` — Fixed type imports and property access
-- `frontend/src/pages/DetectionPage.tsx` — Fixed property names (source, resolution, slicks_detected)
-- `frontend/src/pages/DriftPage.tsx` — Fixed area_km2 and particles references
-- `frontend/src/pages/InvestigationPage.tsx` — Fixed centroid, wind, current, wave access
-- `frontend/src/pages/ReportsPage.tsx` — Fixed Investigation import source
-- `frontend/src/services/api.ts` — Changed to `import type`
-- `frontend/src/components/map/MapLibreMap.tsx` — Fixed optional mmsi access
-- `frontend/src/components/map/MarineMap.tsx` — Fixed all optional property access
-- `frontend/src/components/investigation/EvidenceDrawer.tsx` — Fixed optional chaining
+## Provenance & Reproducibility
+- Checkpoints: `models/campaign/*.pt` (gitignored) + `*.done` resume markers.
+- Reports: `reports/{campaign_summary,calibration,robustness,hard_negatives,explainability}.*`.
+- Evidence ledger carries `StatusLabel` (OBSERVED/ML_SEGMENTED/INFERRED/SIMULATED/TRACKED/CANDIDATE/DEMO_DATA) + provenance on every fact; the system never frames a candidate as guilty.

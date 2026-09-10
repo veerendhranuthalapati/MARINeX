@@ -21,7 +21,12 @@ def make_loader(dataset, batch_size=8, shuffle=False):
 from ml.models.registry import build_model
 from ml.losses.segmentation_losses import get_loss_function
 from ml.training.trainer import SegmentationTrainer
-from ml.training.two_stage_pipeline import TwoStageOilDetector
+from ml.training.two_stage_pipeline import (
+    TwoStageOilDetector,
+    prepare_stage_b_crops_for_training,
+    train_stage_b_classifier,
+    DEFAULT_MIN_AREA,
+)
 from ml.evaluation.metrics import compute_pixel_metrics
 from ml.evaluation.object_eval import evaluate_object_detection
 from ml.evaluation.calibration import calibrate_threshold, compute_expected_calibration_error
@@ -130,26 +135,13 @@ def run_all_experiments(reports_dir: str = "reports"):
     # -------------------------------------------------------------
     # EXPERIMENT 5: Stage B Look-alike Discrimination Classifier
     # -------------------------------------------------------------
-    print("\n[+] Training Stage B Classifier: Oil vs Look-alike ConvNeXt...")
-    # Train 3-class classifier on crop patches
-    classifier_model = build_model("classifier", in_channels=3, num_classes=3).to(device)
-    opt_cls = torch.optim.AdamW(classifier_model.parameters(), lr=1e-3, weight_decay=1e-4)
-    cls_loss_fn = torch.nn.CrossEntropyLoss()
-
-    # Quick training on sample crops
-    classifier_model.train()
-    for ep in range(8):
-        for s in train_samples:
-            img = np.array(Image.open(s["image_path"]))
-            label = 1 if s["has_oil"] else (2 if s["has_lookalike"] else 0)
-            tensor_crop = torch.from_numpy(img.astype(np.float32) / 255.0).permute(2, 0, 1).unsqueeze(0).to(device)
-            target = torch.tensor([label], dtype=torch.long).to(device)
-
-            opt_cls.zero_grad()
-            out = classifier_model(tensor_crop)
-            l = cls_loss_fn(out, target)
-            l.backward()
-            opt_cls.step()
+    print("\n[+] Training Stage B Classifier: Oil vs Look-alike ConvNeXt (on Stage A crops)...")
+    crops, crop_labels, crop_log = prepare_stage_b_crops_for_training(
+        segformer_model, train_samples, device=device, seg_threshold=0.40, min_area=DEFAULT_MIN_AREA
+    )
+    classifier_model = build_model("classifier", in_channels=3, num_classes=3)
+    train_stage_b_classifier(classifier_model, crops, crop_labels, device=device, epochs=12)
+    print(f"    classifier trained on {len(crop_labels)} Stage A instance crops")
 
     two_stage_system = TwoStageOilDetector(segformer_model, classifier_model, device=device)
 
@@ -376,9 +368,15 @@ def run_all_experiments(reports_dir: str = "reports"):
     def eval_perturbed_batch(p_imgs, g_masks):
         p_preds = []
         for im in p_imgs:
-            tensor_im = torch.from_numpy(im.astype(np.float32) / 255.0).permute(2, 0, 1).unsqueeze(0).to(device)
+            # IMPORTANT: use the SAME percentile preprocessing the model was trained
+            # with (not /255.0) so robustness results are valid.
+            norm_im = SARPreprocessor(strategy="percentile")(im)
+            tensor_im = torch.from_numpy(norm_im.astype(np.float32)).permute(2, 0, 1).unsqueeze(0).to(device)
             with torch.no_grad():
                 probs = torch.sigmoid(segformer_model(tensor_im)).squeeze().cpu().numpy()
+            if probs.shape != im.shape[:2]:
+                import cv2
+                probs = cv2.resize(probs, (im.shape[1], im.shape[0]), interpolation=cv2.INTER_LINEAR)
             p_preds.append((probs >= optimal_th).astype(np.uint8))
         return compute_pixel_metrics(np.stack(g_masks), np.stack(p_preds))
 

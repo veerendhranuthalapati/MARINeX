@@ -1,0 +1,25 @@
+# Environment template — copy to configs/environments/local.yaml and adjust.
+# No local/absolute paths should ever be hard-coded here; use ${VAR} substitutions.
+
+data:
+  DATA_ROOT: data
+  DATASET_URI: data/datasets/sentinel1_primary
+  SPLIT_PATH: data/splits/split_group_aware_v1.json
+
+artifacts:
+  ARTIFACT_ROOT: models
+  MODEL_REGISTRY: data/metadata/model_registry.json
+
+mlflow:
+  # Set MLFLOW_URI to enable experiment tracking.
+  MLFLOW_URI: ""
+  # MLFLOW_URI: http://localhost:5000
+
+remote:
+  # Object storage / remote GPU job env (see docs/REMOTE_TRAINING.md).
+  REMOTE_DATA_URI: ""
+  REMOTE_ARTIFACT_URI: ""
+  DATA_PROVIDER: local          # local | remote | object-storage
+
+dl_policy:
+  MAX_LOCAL_DOWNLOAD_GB: 10     # Phase 40 fail-safe threshold

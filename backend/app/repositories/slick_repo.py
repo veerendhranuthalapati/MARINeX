@@ -49,6 +49,7 @@ class SlickRepository:
             existing.width_km = characterization.width_km
             existing.orientation_deg = characterization.orientation_deg
             existing.compactness = characterization.compactness
+            existing.eccentricity = getattr(characterization, "eccentricity", 0.0)
             existing.attributes = characterization.attributes
             db.commit()
             db.refresh(existing)
@@ -68,6 +69,7 @@ class SlickRepository:
             width_km=characterization.width_km,
             orientation_deg=characterization.orientation_deg,
             compactness=characterization.compactness,
+            eccentricity=getattr(characterization, "eccentricity", 0.0),
             attributes=characterization.attributes,
         )
         db.add(obj)

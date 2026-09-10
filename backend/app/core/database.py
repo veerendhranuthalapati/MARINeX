@@ -32,6 +32,11 @@ def get_db():
         db.close()
 
 
+def get_engine_url() -> str:
+    """Return the configured DATABASE_URL (used by background job workers)."""
+    return settings.DATABASE_URL
+
+
 def init_db():
     """Create database tables if they do not exist."""
     logger.info("Initializing database tables...")

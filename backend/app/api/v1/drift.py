@@ -1,11 +1,15 @@
+from datetime import timedelta, timezone
 from typing import Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+from app.core.status import DataQuality
 from app.repositories.slick_repo import SlickRepository
 from app.models.drift import DriftSimulation
 from app.services.drift.service import MockDriftService
 from app.services.environmental.service import EnvironmentalService
+from app.services.environmental.quality import EnvironmentQualityChecker
+from app.services.evidence import EvidenceService
 from app.schemas.drift import DriftSimulationRequest, DriftSimulationResponse
 
 router = APIRouter(prefix="/drift", tags=["Drift Simulation & Hindcasting"])
@@ -28,6 +32,22 @@ def run_drift_simulation(
     env_service = EnvironmentalService()
     lon, lat = slick.centroid[0], slick.centroid[1]
     env = env_service.get_conditions_for_slick(slick_id, lat, lon, slick.detected_at)
+
+    # Phase 7: quality check before simulation (WARN/FAIL documented or blocked).
+    qc = EnvironmentQualityChecker(provider_name=env.source)
+    if req.direction.upper() == "HINDCAST":
+        win_start = slick.detected_at - timedelta(hours=req.duration_hours)
+        win_end = slick.detected_at
+    else:
+        win_start = slick.detected_at
+        win_end = slick.detected_at + timedelta(hours=req.duration_hours)
+    q_report = qc.check_window(lat, lon, win_start, win_end)
+    q_report = qc.check_snapshot(q_report, env.wind.speed_mps, env.ocean_current.speed_mps,
+                                 env.wave.significant_wave_height_m if env.wave else None)
+    if q_report.overall == DataQuality.FAIL:
+        raise HTTPException(status_code=422, detail={
+            "message": "Environmental quality check FAILED; drift simulation blocked.",
+            "quality": q_report.to_dict()})
 
     drift_service = MockDriftService()
     sim_res = drift_service.simulate(
@@ -58,6 +78,14 @@ def run_drift_simulation(
     )
     db.add(sim_db)
     db.commit()
+
+    # Phase 21: record environment + drift evidence on the incident ledger (if bound).
+    incident_id = getattr(slick, "incident_id", None)
+    if incident_id:
+        EvidenceService.record_environment(
+            db, incident_id=incident_id, slick_id=slick_id, env=env, quality=q_report.overall)
+        EvidenceService.record_drift(
+            db, incident_id=incident_id, slick_id=slick_id, sim=sim_res)
 
     return sim_res
 

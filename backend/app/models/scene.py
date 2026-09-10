@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Float, DateTime, JSON
+from sqlalchemy import Column, String, Float, DateTime, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -18,6 +18,9 @@ class SatelliteScene(Base):
     file_path = Column(String, nullable=True)
     metadata_json = Column(JSON, default=dict)
     status = Column(String, default="INGESTED")  # INGESTED, PROCESSED, ERROR
+    incident_id = Column(String, ForeignKey("incidents.id", ondelete="SET NULL"),
+                         nullable=True, index=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     slicks = relationship("OilSlick", back_populates="scene", cascade="all, delete-orphan")
+    incident = relationship("Incident", back_populates="scenes")

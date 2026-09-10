@@ -54,6 +54,9 @@ class SlickCharacterizer:
         length_km = max(side1_km, side2_km)
         width_km = min(side1_km, side2_km)
 
+        # Eccentricity from rotated-rectangle axes: sqrt(1 - (w/l)^2), 0 = circle
+        eccentricity = math.sqrt(max(0.0, 1.0 - (width_km / length_km) ** 2)) if length_km > 0 else 0.0
+
         # Calculate principal axis orientation (0 to 180 degrees clockwise from North)
         if side1_km >= side2_km:
             dx = mrr_coords[1][0] - mrr_coords[0][0]
@@ -80,6 +83,7 @@ class SlickCharacterizer:
             width_km=round(width_km, 3),
             orientation_deg=round(orientation_deg, 1),
             compactness=round(compactness, 4),
+            eccentricity=round(eccentricity, 4),
             confidence=round(confidence, 3),
             attributes=attributes or {},
         )

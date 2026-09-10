@@ -1,3 +1,8 @@
+# Reproducible SegFormer training config (Phase 29).
+# Paths resolve via DATA_ROOT / ARTIFACT_ROOT / MLFLOW_URI env vars, or these fallbacks.
+data_root: data
+artifact_root: models
+
 model:
   name: segformer
   in_channels: 3
@@ -6,10 +11,8 @@ model:
   decoder_dim: 128
 
 data:
-  dataset_root: data/datasets/sentinel1_primary
+  dataset_uri: data/datasets/sentinel1_primary
   channels: VV_VH_DIFF
-  tile_size: 256
-  overlap_ratio: 0.25
   batch_size: 8
   normalization: percentile
   clip_percentiles: [2.0, 98.0]
@@ -20,8 +23,11 @@ training:
   learning_rate: 0.0008
   weight_decay: 0.0001
   loss: bce_dice
+  augmentation: true
   early_stopping_patience: 5
   seed: 42
+
+split_path: data/splits/split_group_aware_v1.json
 
 calibration:
   threshold_sweep: [0.1, 0.2, 0.3, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9]

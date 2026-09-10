@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
@@ -9,6 +10,18 @@ from app.core.config import settings
 from app.repositories.scene_repo import SceneRepository
 from app.schemas.scene import SceneResponse, SceneCreate, SceneListResponse
 from datetime import datetime
+
+
+def _sanitize_upload_component(value: str) -> str:
+    """Reject path separators and traversal sequences; keep safe identifier chars."""
+    name = os.path.basename(value.replace("\\", "/"))
+    name = re.sub(r"[^\w.\-]+", "_", name)
+    name = re.sub(r"\.{2,}", "_", name)
+    name = name.strip(" .")
+    if not name:
+        raise HTTPException(status_code=422, detail="Invalid file/identifier name.")
+    return name
+
 
 router = APIRouter(prefix="/scenes", tags=["Satellite Scenes"])
 
@@ -84,6 +97,7 @@ async def upload_scene(
     db: Session = Depends(get_db),
 ):
     """Upload or register a new satellite scene raster."""
+    scene_id = _sanitize_upload_component(scene_id)
     existing = SceneRepository.get_by_id(db, scene_id)
     if existing:
         raise HTTPException(status_code=400, detail=f"Scene '{scene_id}' already exists.")
@@ -91,7 +105,11 @@ async def upload_scene(
     saved_path = None
     if file:
         os.makedirs(settings.UPLOADS_DIR, exist_ok=True)
-        saved_path = str(settings.UPLOADS_DIR / f"{scene_id}_{file.filename}")
+        safe_filename = _sanitize_upload_component(file.filename or "scene.bin")
+        # Confine writes to UPLOADS_DIR (defense-in-depth against traversal).
+        saved_path = str((settings.UPLOADS_DIR / f"{scene_id}_{safe_filename}").resolve())
+        if os.path.commonpath([saved_path, str(settings.UPLOADS_DIR.resolve())]) != str(settings.UPLOADS_DIR.resolve()):
+            raise HTTPException(status_code=422, detail="Unsafe upload path.")
         with open(saved_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 

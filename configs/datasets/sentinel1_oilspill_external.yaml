@@ -1,0 +1,29 @@
+# MARINeX Dataset Manifest — Sentinel-1 Oil Spill External (Synthetic, Cross-Dataset Split)
+# Held OUT of all training. Used ONLY for cross-dataset generalization checks (Phase 19/47 item 18).
+# This descriptor is declarative — no download triggered by querying.
+
+dataset_id: sentinel1-oilspill-external-v1
+dataset_name: Sentinel-1 Oil Spill External (Singapore Strait / Malacca Strait, 4 scenes)
+source: Procedural SAR generator (ml/data/generate_sar_dataset.py); no real Sentinel-1 imagery
+license: internal-synthetic (SIH26143 team)
+version: "1.0.0"
+provider: local
+local_path: data/datasets/sentinel1_external
+remote_uri: null
+channels: [VV, VH, VV_minus_VH]
+resolution_m: 10.0
+resolution_px: 256
+geographic_coverage: Singapore Strait East, Malacca Strait West
+temporal_coverage: 2026-03-10 (simulated acquisitions)
+labels:
+  "0": background
+  "1": mineral oil
+  "2": look-alike
+  "3": ship (never generated)       # NOTE: ships exist in imagery but are never masked
+  "4": land (never generated)
+split: held-out external (never used in train/val/test)
+n_samples: 40             # 4 scenes x 10 patches
+notes: |
+  Used exclusively for Phase 19 cross-dataset generalization. Ships are present in
+  imagery but not labeled; mask class 3 is never generated — object-level metrics
+  for vessels are therefore not supported on this or the primary dataset.

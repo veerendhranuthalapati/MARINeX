@@ -1,0 +1,33 @@
+{
+  "dataset_id": "sentinel1-oilspill-external-v1",
+  "dataset_name": "Sentinel-1 Oil Spill External (Singapore Strait / Malacca Strait, 4 scenes)",
+  "source": "Procedural SAR generator (ml/data/generate_sar_dataset.py); no real Sentinel-1 imagery",
+  "license": "internal-synthetic (SIH26143 team)",
+  "version": "1.0.0",
+  "provider": "local",
+  "local_path": "data/datasets/sentinel1_external",
+  "remote_uri": null,
+  "channels": [
+    "VV",
+    "VH",
+    "VV_minus_VH"
+  ],
+  "resolution_m": 10.0,
+  "resolution_px": 256,
+  "geographic_coverage": "Singapore Strait East, Malacca Strait West",
+  "temporal_coverage": "2026-03-10 (simulated acquisitions)",
+  "labels": {
+    "0": "background",
+    "1": "mineral oil",
+    "2": "look-alike",
+    "3": "ship (never generated)",
+    "4": "land (never generated)"
+  },
+  "split_path": null,
+  "n_samples": 40,
+  "n_files": 120,
+  "size_bytes": 7202678,
+  "checksum": "279f505e35a0caa32ee1535b80784ed2bf9a25b75aac6a3c7d19f7f9cfa81fab",
+  "status": "local",
+  "notes": "Used exclusively for Phase 19 cross-dataset generalization. Ships are present in\nimagery but not labeled; mask class 3 is never generated \u2014 object-level metrics\nfor vessels are therefore not supported on this or the primary dataset."
+}

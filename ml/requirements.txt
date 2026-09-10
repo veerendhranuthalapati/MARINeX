@@ -1,0 +1,13 @@
+# MARINeX ML + data pipeline runtime dependencies
+# Install:   python -m venv .venv && .venv\Scripts\activate && pip install -r ml/requirements.txt
+# Torch wheel selection is left to the installer (platform/GPU specific).
+torch>=2.2
+torchvision>=0.17
+opencv-python-headless>=4.8
+duckdb>=1.1
+pyarrow>=15.0
+pyyaml>=6.0
+mlflow>=2.14
+numpy>=1.26
+Pillow>=10.0
+pytest>=8.0

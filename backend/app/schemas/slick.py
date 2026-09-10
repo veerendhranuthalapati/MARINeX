@@ -13,6 +13,7 @@ class SlickCharacterization(BaseModel):
     width_km: float
     orientation_deg: float
     compactness: float
+    eccentricity: float = 0.0
     confidence: float
     attributes: Dict[str, Any] = Field(default_factory=dict)
 
@@ -41,6 +42,7 @@ class SlickResponse(BaseModel):
     width_km: float
     orientation_deg: float
     compactness: float
+    eccentricity: float = 0.0
     attributes: Dict[str, Any]
     created_at: datetime
 

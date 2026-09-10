@@ -36,6 +36,7 @@ def list_slicks(
                 width_km=s.width_km,
                 orientation_deg=s.orientation_deg,
                 compactness=s.compactness,
+                eccentricity=s.eccentricity or 0.0,
                 attributes=s.attributes or {},
                 created_at=s.created_at,
             )
@@ -63,6 +64,7 @@ def get_slick(slick_id: str, db: Session = Depends(get_db)):
         width_km=slick.width_km,
         orientation_deg=slick.orientation_deg,
         compactness=slick.compactness,
+        eccentricity=slick.eccentricity or 0.0,
         attributes=slick.attributes or {},
         created_at=slick.created_at,
     )

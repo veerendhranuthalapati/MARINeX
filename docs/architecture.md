@@ -87,3 +87,42 @@ Computes four independent, explainable factor scores:
 Composite Candidate Score:
 $$S_{\text{overall}} = w_{\text{prox}} S_{\text{prox}} + w_{\text{temp}} S_{\text{temp}} + w_{\text{traj}} S_{\text{traj}} + w_{\text{behav}} S_{\text{behav}}$$
 All scores are accompanied by audit-trail natural language forensic evidence points.
+
+---
+
+## 3. Incident-Centric Investigation Layer
+
+The platform is organized around **incidents**, not isolated slicks:
+
+- **Incident** (`Incident` model): an investigation record with lifecycle status
+  (`DETECTED` → `UNDER_INVESTIGATION` → ... ). A scene is attached via
+  `POST /incidents/{id}/scenes`; detection runs on it with an
+  `incident_id` scope.
+- **Evidence ledger** (`EvidenceRecord`): append-only facts with a
+  `StatusLabel` (OBSERVED / ML_SEGMENTED / INFERRED / SIMULATED / TRACKED /
+  CANDIDATE / DEMO_DATA) and a JSON `provenance` object. Every metric, drift
+  forecast, attribution factor, and map artifact lands here — nothing is
+  claimed without a labeled source.
+- **Aggregates** (scoped to the incident's primary slick): `drift-reports`,
+  `attribution` (top-N ranked vessels with per-factor scores nested under
+  `c.factors`), `origin` (latest HINDCAST hull, `INFERRED`), and `report`
+  (consolidated Markdown/summary).
+- **Async jobs** (`jobs` router): POST to create, POST `/{id}/run` to execute
+  a stage (detection / drift / attribution / environment / report) in a
+  background thread with its own engine + DB session (`get_engine_url()`);
+  poll via GET for status + artifacts.
+
+## 4. ML Campaign & Interpretability (post-training production services)
+
+- **Model**: PyTorch U-Net FINAL (IoU=0.8857 / Dice=0.9394 on frozen test),
+  probability maps calibrated via log-space temperature scaling
+  (ECE 17.35 % → 0.46 %, T=0.226). Production threshold 0.40.
+- **Adapters** apply the identical preprocessing contract
+  (`SARPreprocessor(strategy="percentile")`, channel axis `[VV, VH, DIFF]`);
+  single-band inputs are replicated and flagged via `channel_note`.
+- **Explainability service**: occlusion perturbation + Grad-CAM heatmaps with
+  provenance JSON (`reports/explainability/EXP-*`), exposed as
+  `POST /explainability/run`.
+- **Deterministic science**: drift hindcast/forecast and vessel attribution
+  remain closed-form, interpretable physics/geometry — the ML layer only
+  produces the slick mask and calibrated confidence.

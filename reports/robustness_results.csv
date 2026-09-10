@@ -1,8 +1,8 @@
 condition,iou,dice,precision,recall,fpr
-Clean Baseline,0.5265,0.6898,0.9779,0.5328,0.0005
-Reduced Contrast (0.6x),0.0000,0.0000,0.0000,0.0000,0.0000
-Severe Contrast (0.4x),0.0000,0.0000,0.0000,0.0000,0.0000
-Enhanced Speckle (L=2.0),0.6054,0.7542,0.8905,0.6541,0.0033
-Resolution Degradation (20m),0.4923,0.6598,0.9786,0.4977,0.0005
-Radiometric Shift (-3dB),0.0399,0.0767,0.0399,1.0000,1.0000
-Radiometric Shift (+3dB),0.2119,0.3497,1.0000,0.2119,0.0000
+Clean Baseline,0.8857,0.9394,0.9080,0.9731,0.0041
+Reduced Contrast (0.6x),0.8654,0.9278,0.8865,0.9733,0.0052
+Severe Contrast (0.4x),0.8795,0.9359,0.9009,0.9737,0.0044
+Enhanced Speckle (L=2.0),0.4424,0.6134,0.4436,0.9939,0.0518
+Resolution Degradation (20m),0.5786,0.7331,0.5787,0.9998,0.0302
+Radiometric Shift (-3dB),0.8940,0.9440,0.9146,0.9753,0.0038
+Radiometric Shift (+3dB),0.3030,0.4651,0.9998,0.3030,0.0000

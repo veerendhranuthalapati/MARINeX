@@ -89,11 +89,28 @@ MARINeX/
 ├── ml/
 │   ├── features/                      # Tabular feature extraction for look-alike discrimination
 │   ├── evaluation/                    # IoU, Dice, Precision, Recall benchmarks
-│   └── notebooks/                     # Exploratory SAR baseline notebooks
+│   ├── data/                          # Manifests, leakage detection, dataset inventory
+│   ├── data_audit/                    # Audit CLI (integrity + leakage fail-safe)
+│   ├── ais/                           # AIS schema, trajectories, DuckDB/PostGIS engines
+│   ├── explainability/                # Occlusion, GradCAM, decoder-feature attribution
+│   ├── training/                      # Two-stage pipeline (stage-A seg + stage-B classifier)
+│   ├── models/                        # U-Net, U-Net++, SegFormer, classifier, registry
+│   ├── tests/                         # 19 unit tests (manifest, AIS, DuckDB, metrics, registry)
+│   ├── train.py / evaluate.py / explain.py   # Config-driven CLI tools
+│   └── requirements.txt               # Pin ML/data runtime deps
+├── configs/
+│   ├── datasets/                      # sentinel1_oilspill_{primary,external}.yaml descriptors
+│   ├── training/                      # segformer.yaml, unet_plus_plus.yaml
+│   └── environments/                  # local.yaml
 ├── scripts/
 │   ├── seed_demo_data.py              # Populates database with Arabian Sea scenario
-│   └── run_pipeline_cli.py            # CLI tool to run end-to-end pipeline in terminal
-├── docs/                              # System architecture, SIH problem analysis, attribution methodology
+│   ├── run_pipeline_cli.py            # CLI tool to run end-to-end pipeline in terminal
+│   ├── prepare_ais.py                 # AIS CSV -> partitioned parquet
+│   ├── benchmark_ais.py               # DuckDB query benchmark -> reports/ais_benchmark.json
+│   ├── smoke_two_stage.py             # Validates the two-stage pipeline end-to-end
+│   ├── data_status.py                 # Manifest catalog table
+│   └── setup_gpu.sh, prepare_data_remote.sh, train_remote.sh, evaluate_model.sh
+├── docs/                              # Architecture, datasets, ML, explainability, AIS, remote training
 ├── docker-compose.yml                 # Multi-container setup (PostGIS + Backend + Frontend)
 ├── .env.example                       # Environment variables template
 ├── Makefile                           # Developer shortcut commands
@@ -116,24 +133,37 @@ MARINeX/
    pip install -r backend/requirements.txt
    ```
 
-2. **Run the Test Suite**:
+2. **Install ML/Data Dependencies** (into a virtualenv):
    ```bash
-   python -m pytest backend/tests -v
+   python -m venv .venv
+   .venv\Scripts\pip install -r ml/requirements.txt     # or: make install-ml
    ```
 
-3. **Seed Demo Scenario & Verify CLI Pipeline**:
+3. **Run the Test Suites**:
+   ```bash
+   python -m pytest backend/tests -v                     # backend (16 tests)
+   .venv\Scripts\python -m pytest ml/tests -v            # ML + data (19 tests)
+   ```
+
+4. **Audit Datasets & Data Status**:
+   ```bash
+   .venv\Scripts\python -m ml.data_audit.audit_dataset --datasets p,e
+   .venv\Scripts\python scripts/data_status.py
+   ```
+
+5. **Seed Demo Scenario & Verify CLI Pipeline**:
    ```bash
    python scripts/seed_demo_data.py
    python scripts/run_pipeline_cli.py
    ```
 
-4. **Start Backend Server**:
+6. **Start Backend Server**:
    ```bash
    uvicorn app.main:app --app-dir backend --reload --port 8000
    ```
    API Docs available at: `http://localhost:8000/docs`
 
-5. **Start Frontend Dashboard**:
+7. **Start Frontend Dashboard**:
    ```bash
    cd frontend
    npm install
@@ -198,19 +228,47 @@ docker compose up --build -d
 
 ---
 
-## 7. Future ML Roadmap
+## 7. ML & Data Infrastructure
+
+The experimental layer is config-driven and environment-independent
+(`DATA_ROOT`, `ARTIFACT_ROOT`, `SPLIT_PATH`, `MLFLOW_URI`). All datasets are
+synthetic SAR-like patches; reports never claim real-data generalization.
+
+```bash
+# Training & evaluation (writes models/best_model/, reports/)
+.venv\Scripts\python ml/train.py --config configs/training/unet_plus_plus.yaml
+.venv\Scripts\python ml/evaluate.py --checkpoint models/checkpoints/unetpp_best.pt --model unet_plus_plus --threshold 0.40
+
+# Explainability panel (SegFormer, all 3 methods)
+.venv\Scripts\python ml/explain.py --checkpoint models/checkpoints/segformer_primary_best.pt --model segformer \
+  --image data/datasets/sentinel1_primary/images/patch_0101.png --mask data/datasets/sentinel1_primary/masks/patch_0101.png \
+  --methods occlusion,gradcam,attention --out reports/explainability/patch_0101_panel.png
+
+# AIS pipeline (sample -> partitioned parquet -> queries)
+.venv\Scripts\python scripts/prepare_ais.py --input data/samples/sample_ais_trajectories.csv --output data/processed/ais/partitions \
+  --region 71.0 71.7 19.0 19.6 --start 2026-03-01T00:00:00Z --end 2026-03-02T00:00:00Z
+.venv\Scripts\python scripts/benchmark_ais.py   # -> reports/ais_benchmark.json
+```
+
+Best measured test IoU: **U-Net++ 0.9215** (fresh `ml/evaluate.py` run). The
+historical broken Two-Stage `0.0000` was repaired (percentile-preprocessing
+invariant + crop-consistent classifier training); repaired IoU **0.8379**.
+See `docs/ML.md` for full tables and `docs/{DATASETS,DATA_ARCHITECTURE,ML_EXPLAINABILITY,AIS_PIPELINE,REMOTE_TRAINING}.md`.
+
+## 8. Future ML Roadmap
 
 1. **Phase 1 (Complete)**: Classical image processing baseline + explainable 4-factor scoring engine.
-2. **Phase 2**: Deep learning semantic segmentation with **U-Net** (ResNet-50 backbone) trained on Sentinel-1 SAR imagery.
-3. **Phase 3**: Look-alike classification (Random Forest / LightGBM) on texture and meteorological indicators (low-wind suppression, biogenic surfactants).
+2. **Phase 2 (Complete)**: Deep learning semantic segmentation with **U-Net / U-Net++ / SegFormer** trained on Sentinel-1 SAR imagery.
+3. **Phase 3 (Complete)**: Look-alike discrimination (two-stage SegFormer + crop classifier, repaired and validated).
 4. **Phase 4**: Operational integration with **OpenDrift / OpenOil** for full 3D weathering and wave Stokes drift.
 5. **Phase 5**: Real-time AIS streaming integration via **AISHub** and **Coast Guard VTS**.
 6. **Phase 6**: Learned graph-neural vessel attribution model calibrated against historical Maritime Coast Guard incident records.
 7. **Phase 7**: Statistical uncertainty calibration (Conformal Prediction).
 8. **Phase 8**: Multi-satellite fusion (SAR + Optical Sentinel-2 + Thermal Landsat-9).
+9. **Phase 9**: Wire real checkpoints + attribution maps into the backend detection service (currently classical/mock).
 
 ---
 
-## 8. License & Attribution
+## 9. License & Attribution
 Developed for Smart India Hackathon 2026 under Problem Statement SIH26143.
 Licensed under the MIT License.

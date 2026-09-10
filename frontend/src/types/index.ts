@@ -235,6 +235,48 @@ export interface InvestigationReport {
   legal_disclaimer: string;
 }
 
+export interface Incident {
+  id: string;
+  title: string;
+  description?: string;
+  incident_time?: string | null;
+  detection_time?: string | null;
+  centroid?: number[];
+  bounding_box?: number[];
+  scenario: string;
+  status: string;
+  priority_level?: string;
+  assigned_analyst?: string | null;
+  analyst_notes?: string | null;
+  ml_model_id?: string | null;
+  ml_threshold?: number | null;
+  status_label?: string;
+  scene_count?: number;
+  slick_count?: number;
+  evidence_count?: number;
+  created_at?: string;
+  updated_at?: string;
+  slicks?: OilSlick[];
+}
+
+export interface EvidenceRecord {
+  id: string;
+  incident_id: string;
+  evidence_type: string;
+  source: string;
+  source_version?: string;
+  status_label: string;
+  confidence?: number | null;
+  timestamp?: string | null;
+  title: string;
+  summary: string;
+  value: Record<string, any>;
+  provenance: Record<string, any>;
+  related_entity_type?: string | null;
+  related_entity_id?: string | null;
+  created_at?: string;
+}
+
 export interface DetectionRunResult {
   scene_id: string;
   detector_name: string;

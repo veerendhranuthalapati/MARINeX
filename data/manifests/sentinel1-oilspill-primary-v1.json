@@ -1,0 +1,33 @@
+{
+  "dataset_id": "sentinel1-oilspill-primary-v1",
+  "dataset_name": "Sentinel-1 Oil Spill Primary (Arabian Sea, 12 scenes)",
+  "source": "Procedural SAR generator (ml/data/generate_sar_dataset.py); no real Sentinel-1 imagery",
+  "license": "internal-synthetic (SIH26143 team)",
+  "version": "1.0.0",
+  "provider": "local",
+  "local_path": "data/datasets/sentinel1_primary",
+  "remote_uri": null,
+  "channels": [
+    "VV",
+    "VH",
+    "VV_minus_VH"
+  ],
+  "resolution_m": 10.0,
+  "resolution_px": 256,
+  "geographic_coverage": "Arabian Sea \u2014 Mumbai High, Goa Coast, Gujarat Gulf, Gulf of Oman",
+  "temporal_coverage": "2026-03-01..2026-03-06 (simulated acquisitions)",
+  "labels": {
+    "0": "background",
+    "1": "mineral oil",
+    "2": "look-alike (low-wind, biogenic film, internal wave, rain cell, ship wake)",
+    "3": "ship (never generated)",
+    "4": "land (never generated)"
+  },
+  "split_path": "data/splits/split_group_aware_v1.json",
+  "n_samples": 120,
+  "n_files": 360,
+  "size_bytes": 21612134,
+  "checksum": "f25423bf21f0d193f09333398b6c442b50fb862e06a04049982800512f95528a",
+  "status": "local",
+  "notes": "Synthetic dataset for benchmarking. All published metrics are real but were\ncomputed on procedurally-generated SAR-like imagery, NOT operational Sentinel-1\ndata. Never claim operational/real-data generalization from this dataset alone."
+}

@@ -1,0 +1,32 @@
+# Reproducible U-Net++ training config (current best model, IoU 0.9079).
+# Paths resolve via DATA_ROOT / ARTIFACT_ROOT / MLFLOW_URI env vars.
+data_root: data
+artifact_root: models
+
+model:
+  name: unet_plus_plus
+  in_channels: 3
+  num_classes: 1
+
+data:
+  dataset_uri: data/datasets/sentinel1_primary
+  channels: VV_VH_DIFF
+  batch_size: 8
+  normalization: percentile
+  clip_percentiles: [2.0, 98.0]
+
+training:
+  epochs: 10
+  optimizer: adamw
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  loss: bce_dice
+  augmentation: true
+  early_stopping_patience: 5
+  seed: 42
+
+split_path: data/splits/split_group_aware_v1.json
+
+calibration:
+  threshold_sweep: [0.1, 0.2, 0.3, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9]
+  target_metric: dice
