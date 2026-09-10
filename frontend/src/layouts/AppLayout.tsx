@@ -77,6 +77,9 @@ export const AppLayout: React.FC = () => {
     { to: '/candidates', label: 'Vessel Ranking' },
     { to: '/scenes', label: 'Satellite Scenes' },
     { to: '/reports', label: 'Legal Dossier' },
+    { to: '/model-intelligence', label: 'ML Intelligence' },
+    { to: '/explainability', label: 'Explainability' },
+    { to: '/evidence-graph', label: 'Evidence Graph' },
   ];
 
   return (

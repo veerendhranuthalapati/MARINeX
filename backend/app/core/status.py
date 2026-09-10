@@ -28,6 +28,8 @@ class ConfidenceTier(str, Enum):
     MEDIUM = "MEDIUM"
     LOW = "LOW"
     EXCLUDED = "EXCLUDED"
+    INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
+    NO_RELIABLE_CANDIDATE = "NO_RELIABLE_CANDIDATE"
 
 
 class DataQuality(str, Enum):

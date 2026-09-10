@@ -10,6 +10,9 @@ import { AISAnalysisPage } from './pages/AISAnalysisPage';
 import { CandidatesPage } from './pages/CandidatesPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ModelIntelligencePage } from './pages/ModelIntelligencePage';
+import { ExplainabilityPage } from './pages/ExplainabilityPage';
+import { EvidenceGraphPage } from './pages/EvidenceGraphPage';
 
 export const App: React.FC = () => {
   return (
@@ -24,6 +27,9 @@ export const App: React.FC = () => {
           <Route path="ais" element={<AISAnalysisPage />} />
           <Route path="candidates" element={<CandidatesPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="model-intelligence" element={<ModelIntelligencePage />} />
+          <Route path="explainability" element={<ExplainabilityPage />} />
+          <Route path="evidence-graph" element={<EvidenceGraphPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

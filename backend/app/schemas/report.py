@@ -28,3 +28,8 @@ class InvestigationReportResponse(BaseModel):
     candidate_vessels: List[VesselCandidateResponse]
     recommended_actions: List[str]
     legal_disclaimer: str
+    conclusion: str = "CANDIDATE_IDENTIFIED"
+    conclusion_detail: str = (
+        "Candidate vessels were correlated against the drift-hindcast origin region."
+    )
+    data_quality: Dict[str, Any] = Field(default_factory=dict)

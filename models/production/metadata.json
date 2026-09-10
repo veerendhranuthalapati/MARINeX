@@ -1,0 +1,162 @@
+{
+  "model_name": "marinex-unet-v1.0.0",
+  "architecture": "UNetBaseline",
+  "framework": "PyTorch",
+  "checkpoint_path": "models/best_model/marinex_unet_v1.pt",
+  "dataset": {
+    "name": "sentinel1-primary",
+    "total_samples": 120,
+    "split": {
+      "train": 80,
+      "val": 20,
+      "test": 20
+    },
+    "parent_scenes": {
+      "train": [
+        "S1A_IW_GRDH_1SDV_20260304_SCENE_08",
+        "S1A_IW_GRDH_1SDV_20260303_SCENE_06",
+        "S1A_IW_GRDH_1SDV_20260302_SCENE_03",
+        "S1A_IW_GRDH_1SDV_20260305_SCENE_09",
+        "S1A_IW_GRDH_1SDV_20260305_SCENE_10",
+        "S1A_IW_GRDH_1SDV_20260304_SCENE_07",
+        "S1A_IW_GRDH_1SDV_20260306_SCENE_12",
+        "S1A_IW_GRDH_1SDV_20260302_SCENE_04"
+      ],
+      "val": [
+        "S1A_IW_GRDH_1SDV_20260303_SCENE_05",
+        "S1A_IW_GRDH_1SDV_20260301_SCENE_01"
+      ],
+      "test": [
+        "S1A_IW_GRDH_1SDV_20260301_SCENE_02",
+        "S1A_IW_GRDH_1SDV_20260306_SCENE_11"
+      ]
+    }
+  },
+  "preprocessing": {
+    "strategy": "percentile",
+    "channels": [
+      "VV",
+      "VH",
+      "VV-VH"
+    ],
+    "input_shape": [
+      3,
+      256,
+      256
+    ]
+  },
+  "threshold": 0.7,
+  "calibration": {
+    "temperature": 0.2262389063835144,
+    "ece_raw": 0.1734818522625119,
+    "ece_calibrated": 0.004552382889677097,
+    "brier_raw": 0.032959134585368574,
+    "brier_calibrated": 0.0024662308142655793
+  },
+  "frozen_test_metrics": {
+    "iou": 0.8857,
+    "dice": 0.9394,
+    "precision": 0.908,
+    "recall": 0.9731,
+    "fpr": 0.0041,
+    "object_f1": 0.7901
+  },
+  "multi_seed_stability": [
+    {
+      "seed": 42,
+      "val_iou": 0.9459,
+      "val_dice": 0.9722
+    },
+    {
+      "seed": 123,
+      "val_iou": 0.9358,
+      "val_dice": 0.9668
+    },
+    {
+      "seed": 999,
+      "val_iou": 0.9265,
+      "val_dice": 0.9619
+    }
+  ],
+  "robustness": [
+    {
+      "condition": "Clean Baseline",
+      "iou": 0.8857,
+      "dice": 0.9394,
+      "precision": 0.908,
+      "recall": 0.9731,
+      "fpr": 0.0041
+    },
+    {
+      "condition": "Reduced Contrast (0.6x)",
+      "iou": 0.8654,
+      "dice": 0.9278,
+      "precision": 0.8865,
+      "recall": 0.9733,
+      "fpr": 0.0052
+    },
+    {
+      "condition": "Severe Contrast (0.4x)",
+      "iou": 0.8795,
+      "dice": 0.9359,
+      "precision": 0.9009,
+      "recall": 0.9737,
+      "fpr": 0.0044
+    },
+    {
+      "condition": "Enhanced Speckle (L=2.0)",
+      "iou": 0.4424,
+      "dice": 0.6134,
+      "precision": 0.4436,
+      "recall": 0.9939,
+      "fpr": 0.0518
+    },
+    {
+      "condition": "Resolution Degradation (20m)",
+      "iou": 0.5786,
+      "dice": 0.7331,
+      "precision": 0.5787,
+      "recall": 0.9998,
+      "fpr": 0.0302
+    },
+    {
+      "condition": "Radiometric Shift (-3dB)",
+      "iou": 0.894,
+      "dice": 0.944,
+      "precision": 0.9146,
+      "recall": 0.9753,
+      "fpr": 0.0038
+    },
+    {
+      "condition": "Radiometric Shift (+3dB)",
+      "iou": 0.303,
+      "dice": 0.4651,
+      "precision": 0.9998,
+      "recall": 0.303,
+      "fpr": 0.0
+    }
+  ],
+  "cross_dataset": [
+    {
+      "evaluation_domain": "In-Domain Test",
+      "dataset_name": "Dataset A (Arabian Sea)",
+      "iou": 0.8857,
+      "dice": 0.9394,
+      "precision": 0.908,
+      "recall": 0.9731,
+      "fpr": 0.0041
+    },
+    {
+      "evaluation_domain": "Cross-Dataset External",
+      "dataset_name": "Dataset B (Singapore Strait)",
+      "iou": 0.8487,
+      "dice": 0.9181,
+      "precision": 0.8905,
+      "recall": 0.9476,
+      "fpr": 0.0036
+    }
+  ],
+  "git_commit": "f764d88",
+  "frozen_at": "2026-09-10",
+  "freeze_script": "scripts/freeze_final_model.py"
+}

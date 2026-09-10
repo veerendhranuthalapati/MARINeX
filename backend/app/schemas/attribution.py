@@ -60,3 +60,9 @@ class AttributionResultsResponse(BaseModel):
         "with the drift hindcast. They do NOT represent definitive legal proof or calibrated probability of liability."
     )
     candidates: List[VesselCandidateResponse]
+    conclusion: str = (
+        "CANDIDATE_IDENTIFIED"
+    )
+    conclusion_detail: str = (
+        "Candidate vessels were correlated against the drift-hindcast origin region."
+    )

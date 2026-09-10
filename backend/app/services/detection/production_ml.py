@@ -26,6 +26,22 @@ from app.core.config import settings
 from app.core.logging import logger
 
 
+def _find_ml_root() -> str:
+    """Locate the repo 'ml' package by walking up from this module.
+
+    The loader must register the real 'ml' package on sys.path so the frozen
+    checkpoint's architecture (ml.models.registry) can be reconstructed.
+    """
+    probe = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+    for _ in range(6):
+        if os.path.isdir(os.path.join(probe, "ml")) and os.path.isfile(
+            os.path.join(probe, "ml", "models", "registry.py")
+        ):
+            return probe
+        probe = os.path.abspath(os.path.join(probe, ".."))
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+
+
 class ProductionMLDetector(BaseOilSpillDetector):
     def __init__(
         self,
@@ -67,9 +83,9 @@ class ProductionMLDetector(BaseOilSpillDetector):
         try:
             import sys
             import torch
-            ml_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "ml"))
-            if ml_root not in sys.path:
-                sys.path.insert(0, ml_root)
+            repo_root = _find_ml_root()
+            if repo_root not in sys.path:
+                sys.path.insert(0, repo_root)
             from ml.models.registry import build_model
             from ml.data.transforms import SARPreprocessor
 
@@ -118,9 +134,9 @@ class ProductionMLDetector(BaseOilSpillDetector):
         try:
             import sys
             import os as _os
-            ml_root = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), "..", "..", "..", "ml"))
-            if ml_root not in sys.path:
-                sys.path.insert(0, ml_root)
+            repo_root = _find_ml_root()
+            if repo_root not in sys.path:
+                sys.path.insert(0, repo_root)
             from ml.data.transforms import SARPreprocessor
         except ImportError as e:
             raise RuntimeError(f"ml.data.transforms unavailable: {e}")

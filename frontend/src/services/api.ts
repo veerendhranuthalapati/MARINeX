@@ -381,6 +381,19 @@ export const MarineXApi = {
     const res = await api.get(`/incidents/${incidentId}/report`);
     return res.data;
   },
+
+  // ML Intelligence
+  getMlCard: async (): Promise<any> => (await api.get('/ml/card')).data,
+  getMlValidation: async (): Promise<any> => (await api.get('/ml/validation')).data,
+
+  // Explainability
+  getExplainabilityValidation: async (): Promise<any> => (await api.get('/explainability/validation')).data,
+
+  // Demo Cases
+  runDemoCase: async (caseId: string): Promise<any> => (await api.post(`/demo/cases/${caseId}`)).data,
+
+  // Incident Detail (for Evidence Graph)
+  getIncidentDetail: async (incidentId: string): Promise<any> => (await api.get(`/incidents/${incidentId}`)).data,
 };
 
 export default api;

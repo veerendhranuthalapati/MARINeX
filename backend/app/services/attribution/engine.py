@@ -17,6 +17,13 @@ from app.schemas.attribution import (
 )
 from app.core.config import settings
 from app.core.logging import logger
+from app.core.status import ConfidenceTier
+
+
+# Attribution conclusion tiers (Phase 28): every run must land on exactly one.
+CONCLUSION_CANDIDATE = "CANDIDATE_IDENTIFIED"                 # >=1 HIGH/MEDIUM candidate
+CONCLUSION_INSUFFICIENT = "INSUFFICIENT_EVIDENCE"             # candidates exist but too weak
+CONCLUSION_NO_CANDIDATE = "NO_RELIABLE_CANDIDATE"             # no usable candidate / no AIS in window
 
 
 class VesselAttributionEngine:
@@ -202,10 +209,39 @@ class VesselAttributionEngine:
         for idx, cand in enumerate(candidates):
             cand.rank = idx + 1
 
+        # Phase 28: derive a single honest conclusion from the actual outputs.
+        conclusion = CONCLUSION_CANDIDATE
+        conclusion_detail = (
+            "Candidate vessels were correlated against the drift-hindcast origin region."
+        )
+        if candidates:
+            top_conf = candidates[0].confidence
+            if top_conf == ConfidenceTier.EXCLUDED.value:
+                conclusion = CONCLUSION_NO_CANDIDATE
+                conclusion_detail = (
+                    f"All {len(candidates)} scanned vessel(s) were spatially/temporally inconsistent "
+                    "with the inferred spill origin. No reliable candidate identified."
+                )
+            elif top_conf in (ConfidenceTier.LOW.value, ConfidenceTier.MEDIUM.value):
+                conclusion = CONCLUSION_INSUFFICIENT
+                conclusion_detail = (
+                    f"Top candidate ('{candidates[0].vessel.vessel_name}', score {candidates[0].overall_score:.1f}/100) "
+                    "reaches only LOW/MEDIUM evidence consistency. Insufficient for reliable attribution; "
+                    "recommend additional optical/tracking verification before any port-state action."
+                )
+        else:
+            conclusion = CONCLUSION_NO_CANDIDATE
+            conclusion_detail = (
+                "No AIS vessel trajectories were found in the spatial and temporal search window, so no "
+                "candidate correlation could be performed. No reliable candidate identified."
+            )
+
         return AttributionResultsResponse(
             slick_id=slick_id,
             evaluated_at=datetime.now(timezone.utc),
             total_vessels_scanned=len(trajectories),
             weights_applied=w,
             candidates=candidates,
+            conclusion=conclusion,
+            conclusion_detail=conclusion_detail,
         )

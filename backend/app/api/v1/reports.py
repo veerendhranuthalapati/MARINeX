@@ -1,9 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Response
+from datetime import timedelta
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+from app.core.config import settings
 from app.repositories.slick_repo import SlickRepository
+from app.repositories.detection_run_repo import DetectionRunRepository
 from app.repositories.investigation_repo import InvestigationRepository
 from app.services.environmental.service import EnvironmentalService
+from app.services.environmental.quality import EnvironmentQualityChecker
+from app.services.data_quality.service import DataQualityService
 from app.services.reporting.generator import ReportGeneratorService
 from app.schemas.report import InvestigationReportGenerateRequest, InvestigationReportResponse
 from app.schemas.slick import SlickResponse
@@ -52,6 +57,30 @@ def generate_investigation_report(
     drift = get_latest_drift_simulation(slick_id, db)
     candidates = get_slick_candidates(slick_id, db)
 
+    # Phase 31: data quality from ACTUAL pipeline inputs (no fabricated grades).
+    incident_id = getattr(slick, "incident_id", None)
+    runs = DetectionRunRepository.list_for_incident(db, incident_id) if incident_id \
+        else DetectionRunRepository.latest_for_scene(db, slick.scene_id)
+    detection_run = runs[0] if runs else None
+    env_qc = EnvironmentQualityChecker()
+    env_quality = env_qc.check_snapshot(
+        env_qc.check_window(lat=lat, lon=lon,
+                            requested_start=slick.detected_at - timedelta(hours=4),
+                            requested_end=slick.detected_at),
+        wind_speed_mps=env.wind.speed_mps,
+        current_speed_mps=env.ocean_current.speed_mps,
+        wave_height_m=env.wave.significant_wave_height_m if env.wave else None,
+    ).to_dict()
+    data_quality = DataQualityService.assess(
+        detection_status=detection_run.status if detection_run else None,
+        detection_confidence=slick.confidence,
+        env_quality=env_quality,
+        drift_ok=bool(drift and drift.probable_origin_centroid and drift.probable_origin_time),
+        ais_track_count=len(candidates) if candidates else 0,
+    )
+
+    conclusion, conclusion_detail = ReportGeneratorService.derive_conclusion(candidates)
+
     report = ReportGeneratorService.generate_report(
         slick=slick_schema,
         environmental=env,
@@ -60,6 +89,9 @@ def generate_investigation_report(
         analyst_name=req.analyst_name,
         analyst_notes=req.analyst_notes,
         priority_level=req.priority_level or "HIGH",
+        data_quality=data_quality,
+        conclusion=conclusion,
+        conclusion_detail=conclusion_detail,
     )
 
     # Record report generation in investigation

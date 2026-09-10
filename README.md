@@ -1,4 +1,4 @@
-# MARINeX — Satellite Oil Spill Detection & AIS Vessel Attribution Platform
+# MARINeX - Satellite Oil Spill Detection & AIS Vessel Attribution Platform
 
 [![SIH 2026](https://img.shields.io/badge/SIH-2026--SIH26143-0077b6.svg)](https://www.sih.gov.in/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
@@ -6,8 +6,19 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ed.svg)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **Smart India Hackathon 2026 — Problem Statement SIH26143**  
+> **Smart India Hackathon 2026 - Problem Statement SIH26143**  
 > *"Leveraging satellite imagery to determine Oil spills at sea along with AIS data correlations to identify vessel responsible for the spill."*
+
+---
+
+## Project Status
+
+Currently under active development for SIH 2026 (PS SIH26143). The production
+UNet is frozen and calibrated, the incident-centric investigation pipeline
+(evidence ledger, uncertainty, data quality, demo cases) is complete, and the
+backend test suite passes (35 tests) with a clean frontend typecheck and build.
+See [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md) for the full status, known
+limitations, and pending release items.
 
 ---
 
@@ -79,10 +90,10 @@ MARINeX/
 │   │   │   └── reporting/             # Forensic investigation report generator
 │   │   ├── api/v1/                    # REST API routes (scenes, detection, slicks, drift, ais, attribution, reports, demo)
 │   │   └── utils/                     # Geospatial math (haversine, ellipsoidal area, convex hull) & image processing
-│   ├── tests/                         # 16 unit & e2e integration tests (100% passing)
+│   ├── tests/                         # 35 unit & e2e integration tests (100% passing)
 │   ├── requirements.txt
 │   └── Dockerfile
-├── frontend/                          # Geospatial dashboard (React 18, Vite, TypeScript, Leaflet, TailwindCSS)
+├── frontend/                          # Geospatial dashboard (React 18, Vite, TypeScript, Leaflet, TailwindCSS) - incl. ML Intelligence, Explainability, Evidence Graph pages
 ├── data/
 │   ├── samples/                       # Complete standardized sample datasets with documented contracts
 │   └── README.md
@@ -141,7 +152,7 @@ MARINeX/
 
 3. **Run the Test Suites**:
    ```bash
-   python -m pytest backend/tests -v                     # backend (16 tests)
+   python -m pytest backend/tests -v                     # backend (35 tests)
    .venv\Scripts\python -m pytest ml/tests -v            # ML + data (19 tests)
    ```
 
@@ -254,6 +265,36 @@ Best measured test IoU: **U-Net++ 0.9215** (fresh `ml/evaluate.py` run). The
 historical broken Two-Stage `0.0000` was repaired (percentile-preprocessing
 invariant + crop-consistent classifier training); repaired IoU **0.8379**.
 See `docs/ML.md` for full tables and `docs/{DATASETS,DATA_ARCHITECTURE,ML_EXPLAINABILITY,AIS_PIPELINE,REMOTE_TRAINING}.md`.
+
+## Scientific Validation
+
+The production model **marinex-unet-v1.0.0** (frozen UNet, percentile
+preprocessing, channels `[VV, VH, VV-VH]`, threshold 0.70, temperature 0.2262)
+is backed by a documented validation campaign. Key verified results:
+
+- **Frozen test metrics**: IoU 0.8857, Dice 0.9394, Precision 0.9080,
+  Recall 0.9731, FPR 0.0041, object-F1 0.7901.
+- **Calibration**: ECE 0.1735 -> 0.0046 and Brier 0.0330 -> 0.0025 via log-space
+  temperature scaling.
+- **Multi-seed stability**: seeds 42/123/999 -> val IoU 0.9459 / 0.9358 / 0.9265.
+- **Robustness**: stable under mild contrast/radiometric stress; fails under
+  enhanced speckle (IoU 0.4424) and +3 dB radiometric shift (IoU 0.3030) -
+  mirrored by the low-confidence demo-gate behavior.
+- **Cross-dataset**: in-domain Arabian Sea 0.8857 IoU; external Singapore Strait
+  0.8487 IoU / 0.9181 Dice.
+- **Scene-level**: SCENE_02 0.9034, SCENE_11 0.8743 (mean 0.8889); slick-size
+  quartiles 0.9355-0.9678.
+- **Look-alikes**: OIL 0.9583, LOOKALIKE 0.8145, CLEAN 0.0; rejection rate 0.30,
+  clean false-detection 0.0.
+- **Drift**: physics sanity ALL PASS, deterministic, 15 sensitivity scenarios.
+- **AIS**: audit clean (0 duplicates, 0 large jumps), trajectory validation ALL
+  PASS (~0.1% error).
+- **Explainability**: perturbation test PASS (conf drop ~0.055); randomization
+  test WEAK - attribution maps must not be over-interpreted.
+
+Full artifacts live under `reports/` (see
+[docs/QUALITY_GATE.md](docs/QUALITY_GATE.md) for the complete checklist and
+artifact map).
 
 ## 8. Future ML Roadmap
 

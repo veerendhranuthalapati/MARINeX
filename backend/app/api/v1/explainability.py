@@ -9,6 +9,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 from app.services.detection.explainability import explain_service
+from app.services.ml_validation.service import ml_service
 from app.core.config import settings
 
 
@@ -45,3 +46,9 @@ def run_explainability(req: ExplainabilityRunRequest):
         return explain_service.explain(img, methods=req.methods)
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=502, detail=f"Explainability failed: {e}") from e
+
+
+@router.get("/validation", response_model=dict)
+def get_validation_summary():
+    """Validated explainability artifacts from the ML campaign (sanity + examples)."""
+    return ml_service.explainability()

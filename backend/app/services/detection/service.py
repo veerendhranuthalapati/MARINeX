@@ -77,11 +77,13 @@ class DetectionService:
 
         # Resolve image array (for artifact persistence).
         img_arr = None
-        if image_source and isinstance(image_source, str):
+        if image_source is not None and isinstance(image_source, str):
             import os
             from PIL import Image
             if os.path.exists(image_source):
                 img_arr = np.array(Image.open(image_source))
+        elif image_source is not None:
+            img_arr = image_source
 
         try:
             pred = detector.predict(image_input=img_arr if img_arr is not None else image_source,
